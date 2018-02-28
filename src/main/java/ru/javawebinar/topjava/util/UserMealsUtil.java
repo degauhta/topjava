@@ -27,29 +27,29 @@ public class UserMealsUtil {
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Завтрак", 500),
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "Обед", 1000),
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 30, 20, 0), "Ужин", 500),
-                new UserMeal(LocalDateTime.of(2015, Month.MAY, 31, 10, 0), "Завтрак", 1000),
-                new UserMeal(LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Обед", 500),
-                new UserMeal(LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Ужин", 510),
-                new UserMeal(LocalDateTime.of(2016, Month.MAY, 30, 13, 0), "Завтрак", 500),
-                new UserMeal(LocalDateTime.of(2016, Month.MAY, 30, 13, 0), "Обед", 1000),
+                new UserMeal(LocalDateTime.of(2015, Month.MAY, 31, 10, 0), "Завтрак", 2005),
+                new UserMeal(LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Обед", 100),
+                new UserMeal(LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Ужин", 100),
+                new UserMeal(LocalDateTime.of(2016, Month.MAY, 30, 10, 0), "Завтрак", 500),
+                new UserMeal(LocalDateTime.of(2016, Month.MAY, 30, 11, 0), "Обед", 1000),
                 new UserMeal(LocalDateTime.of(2016, Month.MAY, 30, 20, 0), "Ужин", 500),
-                new UserMeal(LocalDateTime.of(2016, Month.MAY, 31, 10, 0), "Завтрак", 1000),
-                new UserMeal(LocalDateTime.of(2016, Month.MAY, 31, 13, 0), "Обед", 500),
-                new UserMeal(LocalDateTime.of(2016, Month.MAY, 31, 20, 0), "Ужин", 510),
+                new UserMeal(LocalDateTime.of(2016, Month.MAY, 31, 10, 0), "Завтрак", 100),
+                new UserMeal(LocalDateTime.of(2016, Month.MAY, 31, 13, 0), "Обед", 2005),
+                new UserMeal(LocalDateTime.of(2016, Month.MAY, 31, 20, 0), "Ужин", 100),
                 new UserMeal(LocalDateTime.of(2017, Month.MAY, 30, 10, 0), "Завтрак", 500),
                 new UserMeal(LocalDateTime.of(2017, Month.MAY, 30, 13, 0), "Обед", 1000),
                 new UserMeal(LocalDateTime.of(2017, Month.MAY, 30, 20, 0), "Ужин", 500),
-                new UserMeal(LocalDateTime.of(2017, Month.MAY, 31, 10, 0), "Завтрак", 1000),
-                new UserMeal(LocalDateTime.of(2017, Month.MAY, 31, 13, 0), "Обед", 500),
-                new UserMeal(LocalDateTime.of(2017, Month.MAY, 31, 20, 0), "Ужин", 510)
+                new UserMeal(LocalDateTime.of(2017, Month.MAY, 31, 10, 0), "Завтрак", 100),
+                new UserMeal(LocalDateTime.of(2017, Month.MAY, 31, 13, 0), "Обед", 100),
+                new UserMeal(LocalDateTime.of(2017, Month.MAY, 31, 20, 0), "Ужин", 2005)
         );
-        getFilteredWithExceeded(mealList, LocalTime.of(7, 0), LocalTime.of(12, 0), 2005)
+        getFilteredWithExceeded(mealList, LocalTime.of(17, 0), LocalTime.of(22, 0), 2005)
                 .forEach(System.out::println);
         System.out.println("cycle");
-        getFilteredWithExceededCycle(mealList, LocalTime.of(7, 0), LocalTime.of(12, 0), 2005)
+        getFilteredWithExceededCycle(mealList, LocalTime.of(17, 0), LocalTime.of(22, 0), 2005)
                 .forEach(System.out::println);
         System.out.println("stream");
-        getFilteredWithExceededStream(mealList, LocalTime.of(7, 0), LocalTime.of(12, 0), 2005)
+        getFilteredWithExceededStream(mealList, LocalTime.of(17, 0), LocalTime.of(22, 0), 2005)
                 .forEach(System.out::println);
     }
 
@@ -59,11 +59,13 @@ public class UserMealsUtil {
         List<UserMealWithExceed> tmpResultExceed = new ArrayList<>();
         List<UserMealWithExceed> tmpResultNoExceed = new ArrayList<>();
         NavigableMap<LocalDate, Integer> dayCalories = new TreeMap<>();
+        LocalDate day = mealList.get(0).getDate();
         for (UserMeal userMeal : mealList) {
             LocalDate mealDate = userMeal.getDateTime().toLocalDate();
-            boolean newDay = !dayCalories.isEmpty() && dayCalories.lastEntry().getKey().compareTo(mealDate) != 0; //todo
             dayCalories.merge(mealDate, userMeal.getCalories(), (oldVal, newVal) -> oldVal + newVal);
             if (TimeUtil.isBetween(userMeal.getDateTime().toLocalTime(), startTime, endTime)) {
+                boolean newDay = day.compareTo(mealDate) != 0;
+                day = mealDate;
                 if (!dayCalories.isEmpty() && newDay) {
                     result.addAll(getResultsPerDay(caloriesPerDay, dayCalories, tmpResultExceed, tmpResultNoExceed));
                 }
@@ -110,7 +112,6 @@ public class UserMealsUtil {
 
     public static List<UserMealWithExceed> getFilteredWithExceededCycle(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
         mealList.sort(Comparator.comparing(UserMeal::getDateTime));
-        List<UserMealWithExceed> result = new ArrayList<>();
         Map<LocalDate, Warehouse> dayCalories = new HashMap<>();
         for (UserMeal userMeal : mealList) {
             LocalDate mealDate = userMeal.getDateTime().toLocalDate();
@@ -121,10 +122,12 @@ public class UserMealsUtil {
                 UserMealWithExceed meal = new UserMealWithExceed(userMeal.getDateTime(),
                         userMeal.getDescription(), userMeal.getCalories(), currentWarehouse.isBoundMealsIsExceeded());
                 currentWarehouse.addMeal(meal);
-                result.add(meal);
             }
         }
-        return result;
+        List<Warehouse> list = new ArrayList<>(dayCalories.values());
+        return list.stream()
+                .flatMap(s -> s.getBoundMeals().stream())
+                .collect(Collectors.toList());
     }
 
     private static class Warehouse {
@@ -150,6 +153,10 @@ public class UserMealsUtil {
 
         void addMeal(UserMealWithExceed meal) {
             this.boundMeals.add(meal);
+        }
+
+        List<UserMealWithExceed> getBoundMeals() {
+            return this.boundMeals;
         }
     }
 }
