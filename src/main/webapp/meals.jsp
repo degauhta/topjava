@@ -22,17 +22,17 @@
 
 <table border="1">
     <tr>
-        <td>id</td>
+        <td style="display:none">id</td>
         <td>description</td>
         <td>dateTime</td>
         <td>calories</td>
-        <td>exceed</td>
+        <td style="display:none">exceed</td>
         <td></td>
         <td></td>
     </tr>
     <c:forEach items="${meals}" var="meal">
         <tr style="color: ${meal.exceed ? '#FF4136' : '#2ECC40'}">
-            <td>
+            <td style="display:none">
                 <c:out value="${meal.id}"/>
             </td>
             <td>
@@ -46,7 +46,7 @@
             <td>
                 <c:out value="${meal.calories}"/>
             </td>
-            <td>
+            <td style="display:none">
                 <c:out value="${meal.exceed}"/>
             </td>
             <td>

@@ -18,7 +18,6 @@ public class MealHsqldbImpl implements DaoMeal {
                 meal.add(new Meal(rs.getInt("id"), rs.getTimestamp("dateTime").toLocalDateTime(),
                         rs.getString("description"), rs.getInt("calories")));
             }
-            System.out.println();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -28,7 +27,7 @@ public class MealHsqldbImpl implements DaoMeal {
     @Override
     public Meal save(Meal meal) {
         Meal newMeal = null;
-        if (meal.getId() == -1) {
+        if (meal.getId() == null) {
             try (PreparedStatement stmt = DaoFactory.getConnection()
                     .prepareStatement("INSERT INTO meals(description, calories, datetime) VALUES(?, ?, ?);",
                             RETURN_GENERATED_KEYS)) {
