@@ -20,14 +20,14 @@ public class MealRestController {
     }
 
     public Meal save(Meal meal) {
-        return service.save(meal);
+        return service.save(meal, AuthorizedUser.id());
     }
 
-    public Meal get(int id, int userId) {
-        return service.get(id, userId);
+    public Meal get(int id) {
+        return service.get(id, AuthorizedUser.id());
     }
 
-    public void delete(int id, int userId) {
-        service.delete(id, userId);
+    public void delete(int id) {
+        service.delete(id, AuthorizedUser.id());
     }
 }

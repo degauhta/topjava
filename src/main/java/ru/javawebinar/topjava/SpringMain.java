@@ -5,6 +5,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
+import ru.javawebinar.topjava.service.MealService;
+import ru.javawebinar.topjava.service.MealServiceImpl;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 import ru.javawebinar.topjava.web.meal.MealRestController;
 import ru.javawebinar.topjava.web.user.AdminRestController;
@@ -28,10 +30,11 @@ public class SpringMain {
                     "save", 501, AuthorizedUser.id()));
             mealRestController.getAll().forEach(System.out::println);
 
-            System.out.println(mealRestController.get(meal.getId(), AuthorizedUser.id()));
+            System.out.println(mealRestController.get(meal.getId()));
 
+            MealService mealService = appCtx.getBean(MealServiceImpl.class);
             try {
-                mealRestController.get(meal.getId(), 123);
+                mealService.get(meal.getId(), 123);
             } catch (NotFoundException ex) {
                 System.out.println("NotFoundException");
             }
@@ -57,12 +60,12 @@ public class SpringMain {
             }
 
             try {
-                mealRestController.delete(meal.getId(), 123);
+                mealService.delete(meal.getId(), 123);
             } catch (NotFoundException ex) {
                 System.out.println("NotFoundException");
             }
 
-            mealRestController.delete(meal.getId(), AuthorizedUser.id());
+            mealRestController.delete(meal.getId());
             mealRestController.getAll().forEach(System.out::println);
         }
     }
