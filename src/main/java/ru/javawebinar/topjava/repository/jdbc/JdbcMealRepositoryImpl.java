@@ -22,6 +22,8 @@ public class JdbcMealRepositoryImpl implements MealRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
     private final SimpleJdbcInsert insertMeal;
 
     @Autowired
@@ -31,6 +33,7 @@ public class JdbcMealRepositoryImpl implements MealRepository {
                 .usingGeneratedKeyColumns("id");
 
         this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Override
@@ -42,17 +45,10 @@ public class JdbcMealRepositoryImpl implements MealRepository {
                 .addValue("calories", meal.getCalories())
                 .addValue("userId", userId);
         if (meal.isNew()) {
-            if (jdbcTemplate
-                    .query("SELECT * FROM meals WHERE user_id=? AND date_time=?", ROW_MAPPER,
-                            userId, meal.getDateTime()).isEmpty()) {
-                Number newKey = insertMeal.executeAndReturnKey(map);
-                meal.setId(newKey.intValue());
-            } else {
-                return null;
-            }
-        } else if (jdbcTemplate.update("UPDATE meals SET date_time=?, " +
-                        "description=?, calories=? WHERE id=? AND user_id=?",
-                meal.getDateTime(), meal.getDescription(), meal.getCalories(), meal.getId(), userId) == 0) {
+            Number newKey = insertMeal.executeAndReturnKey(map);
+            meal.setId(newKey.intValue());
+        } else if (namedParameterJdbcTemplate.update("UPDATE meals SET date_time=:dateTime, " +
+                "description=:description, calories=:calories WHERE id=:id AND user_id=:userId", map) == 0) {
             return null;
         }
         return meal;
