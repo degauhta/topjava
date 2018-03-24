@@ -1,16 +1,48 @@
 package ru.javawebinar.topjava.model;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+@NamedQueries({
+        @NamedQuery(name = Meal.ALL_SORTED, query = "SELECT m FROM Meal m WHERE m.user.id=:userId ORDER BY m.dateTime DESC"),
+        @NamedQuery(name = Meal.BY_ID_USER, query = "SELECT m FROM Meal m WHERE m.id=:id AND m.user.id=:userId"),
+        @NamedQuery(name = Meal.UPDATE, query =
+                "UPDATE Meal m SET m.description=:description, m.calories=:calories, m.dateTime=:dateTime WHERE m.id=:id AND m.user.id=:userId"),
+        @NamedQuery(name = Meal.DELETE, query = "DELETE FROM Meal m WHERE m.id=:id AND m.user.id=:userId"),
+        @NamedQuery(name = Meal.BETWEEN, query =
+                "SELECT m FROM Meal m WHERE m.user.id=:userId AND m.dateTime>=:startDate AND m.dateTime<=:endDate ORDER BY m.dateTime DESC")
+//                "SELECT m FROM Meal m WHERE m.user.id=:userId AND m.dateTime between :startDate AND :endDate ORDER BY m.dateTime DESC")
+})
+@Entity
+@Table(name = "meals", uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "date_time"}, name = "meals_unique_user_datetime_idx")})
 public class Meal extends AbstractBaseEntity {
+
+    public static final String ALL_SORTED = "Meal.getAllSorted";
+    public static final String BY_ID_USER = "Meal.getByIdUserId";
+    public static final String UPDATE = "Meal.update";
+    public static final String DELETE = "Meal.delete";
+    public static final String BETWEEN = "Meal.between";
+
+    @Column(name = "date_time", columnDefinition = "timestamp")
+    @NotNull
     private LocalDateTime dateTime;
 
+    @Column(name = "description", nullable = false)
+    @NotBlank
     private String description;
 
+    @Column(name = "calories", columnDefinition = "int")
     private int calories;
 
     @ManyToOne(fetch = FetchType.LAZY)
