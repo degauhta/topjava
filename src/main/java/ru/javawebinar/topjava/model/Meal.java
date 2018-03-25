@@ -8,6 +8,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -17,8 +19,6 @@ import java.time.LocalTime;
 @NamedQueries({
         @NamedQuery(name = Meal.ALL_SORTED, query = "SELECT m FROM Meal m WHERE m.user.id=:userId ORDER BY m.dateTime DESC"),
         @NamedQuery(name = Meal.BY_ID_USER, query = "SELECT m FROM Meal m WHERE m.id=:id AND m.user.id=:userId"),
-        @NamedQuery(name = Meal.UPDATE, query =
-                "UPDATE Meal m SET m.description=:description, m.calories=:calories, m.dateTime=:dateTime WHERE m.id=:id AND m.user.id=:userId"),
         @NamedQuery(name = Meal.DELETE, query = "DELETE FROM Meal m WHERE m.id=:id AND m.user.id=:userId"),
         @NamedQuery(name = Meal.BETWEEN, query =
                 "SELECT m FROM Meal m WHERE m.user.id=:userId AND m.dateTime>=:startDate AND m.dateTime<=:endDate ORDER BY m.dateTime DESC")
@@ -30,7 +30,6 @@ public class Meal extends AbstractBaseEntity {
 
     public static final String ALL_SORTED = "Meal.getAllSorted";
     public static final String BY_ID_USER = "Meal.getByIdUserId";
-    public static final String UPDATE = "Meal.update";
     public static final String DELETE = "Meal.delete";
     public static final String BETWEEN = "Meal.between";
 
@@ -43,9 +42,12 @@ public class Meal extends AbstractBaseEntity {
     private String description;
 
     @Column(name = "calories", columnDefinition = "int")
+    @Min(10)
+    @Max(5000)
     private int calories;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull
     private User user;
 
     public Meal() {

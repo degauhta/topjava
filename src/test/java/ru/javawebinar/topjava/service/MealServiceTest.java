@@ -34,6 +34,7 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @RunWith(SpringJUnit4ClassRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
+
     private static final Logger log = LoggerFactory.getLogger(InMemoryMealRepositoryImpl.class);
 
     @AfterClass
@@ -111,8 +112,10 @@ public class MealServiceTest {
         assertMatch(service.get(MEAL1_ID, USER_ID), updated);
     }
 
-    @Test(expected = NotFoundException.class)
+    @Test
     public void updateNotFound() throws Exception {
+        exception.expect(NotFoundException.class);
+        exception.expectMessage(String.format("Not found entity with id=%s", MEAL1_ID));
         service.update(MEAL1, ADMIN_ID);
     }
 
