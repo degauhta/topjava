@@ -16,11 +16,14 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.repository.mock.InMemoryMealRepositoryImpl;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static ru.javawebinar.topjava.MealTestData.*;
@@ -35,22 +38,24 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
 
-    private static final Logger log = LoggerFactory.getLogger(InMemoryMealRepositoryImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
 
     @AfterClass
     public static void after() {
-        log.info(allTestTime.toString());
+        Optional<String> optional = allTestTime.keySet().stream().max(Comparator.comparingInt(String::length));
+        int max = optional.isPresent() ? optional.get().length() : 0;
+        for (Map.Entry<String, Long> entry : allTestTime.entrySet()) {
+            int numberOfSpaces = max - entry.getKey().length() + 1;
+            log.info(String.format("Test %s%" + numberOfSpaces + "sspent %d milliseconds", entry.getKey(), " ", entry.getValue()));
+        }
     }
 
-    private static StringBuilder allTestTime = new StringBuilder();
+    private static Map<String, Long> allTestTime = new HashMap<>();
 
     private static void logInfo(Description description, long nanos) {
         String testName = description.getMethodName();
-        String msg = String.format("Test %s finished, spent %d milliseconds",
-                testName, TimeUnit.NANOSECONDS.toMillis(nanos));
-        allTestTime.append(msg);
-        allTestTime.append(System.lineSeparator());
-        log.info(msg);
+        allTestTime.put(testName, TimeUnit.NANOSECONDS.toMillis(nanos));
+        log.info("Test {} finished, spent {} milliseconds", testName, TimeUnit.NANOSECONDS.toMillis(nanos));
     }
 
     @Rule
@@ -66,7 +71,6 @@ public class MealServiceTest {
 
     static {
         SLF4JBridgeHandler.install();
-        allTestTime.append(System.lineSeparator());
     }
 
     @Autowired
