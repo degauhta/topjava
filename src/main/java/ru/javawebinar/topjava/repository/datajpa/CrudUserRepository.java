@@ -30,4 +30,13 @@ public interface CrudUserRepository extends JpaRepository<User, Integer> {
     List<User> findAll(Sort sort);
 
     User getByEmail(String email);
+
+    /**
+     * Lazy get.
+     *
+     * @param id user id
+     * @return the found entity instance
+     */
+    @Override
+    User getOne(Integer id);
 }
